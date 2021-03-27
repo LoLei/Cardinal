@@ -2,6 +2,10 @@ version: "2.1"
 services:
     cardinal:
         container_name: cardinal
+        environment:
+            - REDDIT_API_CLIENT_ID=$REDDIT_API_CLIENT_ID
+            - REDDIT_API_CLIENT_SECRET=$REDDIT_API_CLIENT_SECRET
+            - REDDIT_API_CLIENT_USER=$REDDIT_API_CLIENT_USER
         build: .
         image: jmaguire/cardinal
         command: config/config.json

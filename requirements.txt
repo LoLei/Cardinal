@@ -8,3 +8,5 @@ service_identity==18.1.0
 # Various URL scraping plugins
 beautifulsoup4==4.9.3
 requests==2.22.0
+
+praw~=7.2.0

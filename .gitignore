@@ -1,5 +1,7 @@
 *.py[cod]
+creds
 .python-version
+.env
 
 # Cardinal configuration files
 /config/*
