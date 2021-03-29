@@ -188,10 +188,11 @@ class PluginManager:
             elif param == 'config':
                 kwargs['config'] = config
             else:
-                raise PluginError(
-                    "Unknown parameter {} in entrypoint signature"
-                    .format(param)
-                )
+                # raise PluginError(
+                #     "Unknown parameter {} in entrypoint signature"
+                #     .format(param)
+                # )
+                pass  # For subwatch dependency injection
 
         return entrypoint(**kwargs)
 
