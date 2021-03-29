@@ -9,4 +9,6 @@ service_identity==18.1.0
 beautifulsoup4==4.9.3
 requests==2.22.0
 
-praw~=7.2.0
+# Reddit
+praw==7.2.0
+prawcore==2.0.0
