@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 import threading
+import time
 from dataclasses import dataclass
 from typing import Generator, Any
 
@@ -57,6 +58,12 @@ class SubWatchPlugin(object):
 
     def close(self, cardinal: CardinalBot) -> None:
         pass
+
+    @command(['dbgnb'])
+    def debug_msg_nb(self, cardinal: CardinalBot, user, channel, msg) -> None:
+        nick, ident, vhost = user
+        cardinal.sendMsg(channel, f"({nick}) debug 1 {time.time()}")
+        self._cardinal.sendMsg(self._channel, f"({nick}) debug 2 {time.time()}")
 
     @command(['snbsw'])
     @help("Start sub watch")
