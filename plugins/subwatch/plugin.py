@@ -86,8 +86,9 @@ class SubWatchPlugin(object):
                         channel=self._channel,
                         message=f"New post by {submission.author}: {submission.title} - {submission.url}")
                 return
-            except prawcore.exceptions.ServerError:
+            except (prawcore.exceptions.ServerError, prawcore.exceptions.RequestException):
                 log.exception("Reddit call failed, restarting...")
+                # TODO: Re-init praw handler connection
 
 
 entrypoint = SubWatchPlugin
