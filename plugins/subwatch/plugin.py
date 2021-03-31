@@ -48,6 +48,7 @@ class SubWatchPlugin(object):
     def __init__(self, cardinal: CardinalBot, config, praw_handler: PrawHandler = PrawHandler()) -> None:
         self._sub_watch_started = False
         self._cardinal = cardinal
+        self._updated_cardinal: CardinalBot = cardinal
         default_channel = "##bot-testing"
         self._channel = os.environ.get("CHANNEL", default_channel)
         if self._channel == default_channel:
@@ -70,6 +71,8 @@ class SubWatchPlugin(object):
         cardinal.sendMsg(channel, f"({nick}) debug 1 {time.time()}")
         # Send with original member variable object
         self._cardinal.sendMsg(self._channel, f"({nick}) debug 2 {time.time()}")
+        # Send with updated original member variable object
+        self._updated_cardinal.sendMsg(self._channel, f"({nick}) debug 3 {time.time()}")
 
     @event('irc.privmsg')
     def event_privmsg(self, cardinal: CardinalBot, user, channel: str, msg: str) -> None:
@@ -85,8 +88,8 @@ class SubWatchPlugin(object):
     @help("Start sub watch")
     def trigger_init(self, cardinal: CardinalBot, user, channel, msg) -> None:
         if not self._sub_watch_started:
-            self._channel = channel
             self._sub_watch_started = True
+            self._updated_cardinal = cardinal
             self._start_sub_watch()
 
     def _start_sub_watch(self) -> None:
@@ -109,6 +112,7 @@ class SubWatchPlugin(object):
             except (prawcore.exceptions.ServerError, prawcore.exceptions.RequestException):
                 log.exception("Reddit API call failed, restarting...")
                 self._praw_handler = PrawHandler()
+                self._cardinal = self._updated_cardinal
 
 
 entrypoint = SubWatchPlugin
