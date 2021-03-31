@@ -16,10 +16,10 @@ def test_subwatch():
                                                         for s in submissions)
 
     subwatch = SubWatchPlugin.create(cardinal, {}, praw_handler)
-    subwatch.trigger_init(cardinal, "", "#test", "")
+    subwatch.trigger_init(cardinal, "", "##bot-testing", "")
 
-    calls = [call(channel="#test", message="New post by author1: title1 - url1"),
-             call(channel="#test", message="New post by author2: title2 - url2")]
+    calls = [call(channel="##bot-testing", message="New post by author1: title1 - url1"),
+             call(channel="##bot-testing", message="New post by author2: title2 - url2")]
     cardinal.sendMsg.assert_has_calls(calls)
 
 
