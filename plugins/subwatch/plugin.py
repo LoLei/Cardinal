@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 import threading
+import time
 from dataclasses import dataclass
 from typing import Generator, Any
 
@@ -9,7 +10,7 @@ import praw
 import prawcore
 
 from cardinal.bot import CardinalBot
-from cardinal.decorators import command, help
+from cardinal.decorators import command, help, event
 
 log = logging.getLogger(__name__)
 
@@ -47,7 +48,11 @@ class SubWatchPlugin(object):
     def __init__(self, cardinal: CardinalBot, config, praw_handler: PrawHandler = PrawHandler()) -> None:
         self._sub_watch_started = False
         self._cardinal = cardinal
-        self._channel = ""
+        self._updated_cardinal: CardinalBot = cardinal
+        default_channel = "##bot-testing"
+        self._channel = os.environ.get("CHANNEL", default_channel)
+        if self._channel == default_channel:
+            log.warning(f"Using default channel: {default_channel}")
         self._thread: threading.Thread
         self._praw_handler = praw_handler
 
@@ -58,29 +63,56 @@ class SubWatchPlugin(object):
     def close(self, cardinal: CardinalBot) -> None:
         pass
 
+    @command(['dbgnb'])
+    def debug_msg_nb(self, cardinal: CardinalBot, user, channel: str, msg) -> None:
+        """ Method used for debugging purposes """
+        nick, ident, vhost = user
+        # Send with passed-in object
+        cardinal.sendMsg(channel, f"({nick}) debug 1 {time.time()}")
+        # Send with original member variable object
+        self._cardinal.sendMsg(self._channel, f"({nick}) debug 2 {time.time()}")
+        # Send with updated original member variable object
+        self._updated_cardinal.sendMsg(self._channel, f"({nick}) debug 3 {time.time()}")
+
+    @event('irc.privmsg')
+    def event_privmsg(self, cardinal: CardinalBot, user, channel: str, msg: str) -> None:
+        if msg == "snbsw":
+            log.debug("EVENT: event_privmsg got command snbsw")
+            self.trigger_init(cardinal, user, self._channel, msg)
+
+    @event('irc.notice')
+    def event_notice(self, cardinal: CardinalBot, user, channel: str, msg: str) -> None:
+        self.trigger_init(cardinal, user, self._channel, msg)
+
     @command(['snbsw'])
     @help("Start sub watch")
     def trigger_init(self, cardinal: CardinalBot, user, channel, msg) -> None:
         if not self._sub_watch_started:
-            self._channel = channel
             self._sub_watch_started = True
+            self._updated_cardinal = cardinal
             self._start_sub_watch()
 
     def _start_sub_watch(self) -> None:
-        self._thread = threading.Thread(target=self._listen_reddit)
+        default_sub = "test"
+        subreddit = os.environ.get("SUBREDDIT", default_sub)
+        if subreddit == default_sub:
+            log.warning(f"Using default sub: r/{default_sub}")
+        self._thread = threading.Thread(target=self._listen_reddit, args=(subreddit,))
         self._thread.start()
 
-    def _listen_reddit(self) -> None:
+    def _listen_reddit(self, subreddit: str) -> None:
         while True:
             try:
-                for submission in self._praw_handler.stream_new_submissions("linuxmasterrace"):
+                for submission in self._praw_handler.stream_new_submissions(subreddit):
                     print(f"New post by {submission.author}: {submission.title} - {submission.url}")
                     self._cardinal.sendMsg(
                         channel=self._channel,
                         message=f"New post by {submission.author}: {submission.title} - {submission.url}")
                 return
-            except prawcore.exceptions.ServerError:
-                log.exception("Reddit call failed, restarting...")
+            except (prawcore.exceptions.ServerError, prawcore.exceptions.RequestException):
+                log.exception("Reddit API call failed, restarting...")
+                self._praw_handler = PrawHandler()
+                self._cardinal = self._updated_cardinal
 
 
 entrypoint = SubWatchPlugin
