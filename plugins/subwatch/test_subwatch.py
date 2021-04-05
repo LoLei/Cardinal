@@ -12,8 +12,7 @@ def test_subwatch():
     praw_handler.stream_new_submissions = MagicMock()
     submissions = [Submission("url1", "author1", "id1", "title1"),
                    Submission("url2", "author2", "id2", "title2")]
-    praw_handler.stream_new_submissions.return_value = (Submission(url=s.url, author=s.author, id=s.id, title=s.title)
-                                                        for s in submissions)
+    praw_handler.stream_new_submissions.return_value = (s for s in submissions)
 
     subwatch = SubWatchPlugin.create(cardinal, {}, praw_handler)
     subwatch.trigger_init(cardinal, "", "##bot-testing", "")

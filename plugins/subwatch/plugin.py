@@ -40,6 +40,11 @@ class PrawHandler:
             Generator[Submission, Any, None]:
         subreddit = self._reddit.subreddit(subreddit_name)
         for submission in subreddit.stream.submissions(skip_existing=skip_existing):
+            max_age_seconds = 60 * 60
+            if int(time.time()) - int(submission.created_utc) > max_age_seconds:
+                log.warning(f"Got submission {submission.id} created at {submission.created_utc}")
+                log.warning(f"Ignoring due to it being older than max age seconds ({max_age_seconds})")
+                continue
             url = self._short_base_url + submission.id
             yield Submission(url=url, author=submission.author.name, id=submission.id, title=submission.title)
 
