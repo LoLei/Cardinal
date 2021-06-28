@@ -1,3 +1,12 @@
+# Fork of Cardinal for a subwatch replacement.
+
+Run:
+```
+docker run --env-file .env -v $(pwd)/config:/usr/src/app/config ghcr.io/lolei/nuh_bot:1.0.0 config/config.json
+```
+
+Original readme below.
+
 [![Cardinal](./_assets/cardinal.svg)](https://github.com/JohnMaguire/Cardinal)
 
 # Meet Cardinal.

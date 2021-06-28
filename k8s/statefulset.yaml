@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nuh-bot-configmap
+data:
+  CHANNEL: "#linuxmasterrace"
+  SUBREDDIT: linuxmasterrace
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nuh-bot-sts
+spec:
+  serviceName: "nuh-bot-svc"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nuh-bot
+  template:
+    metadata:
+      labels:
+        app: nuh-bot
+    spec:
+      containers:
+        - name: nuh-bot
+          image: ghcr.io/lolei/nuh_bot:1.0.0
+          args: ["config/config.json" ]
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: nuh-bot-configmap
+            - secretRef:
+                name: nuh-bot-secret
+          volumeMounts:
+          - name: nuh-bot
+            mountPath: /usr/src/app/config
+            readOnly: true
+      volumes:
+      - name: nuh-bot
+        secret:
+          secretName: nuh-bot-secret-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nuh-bot-svc
+  labels:
+    app: nuh-bot
+spec:
+  clusterIP: None
+  selector:
+    app: nuh-bot
