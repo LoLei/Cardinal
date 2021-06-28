@@ -24,6 +24,7 @@ spec:
       containers:
         - name: nuh-bot
           image: ghcr.io/lolei/nuh_bot:1.0.0
+          args: ["config/config.json" ]
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
