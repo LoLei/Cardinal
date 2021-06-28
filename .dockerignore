@@ -1,1 +1,8 @@
 *.pyc
+.git
+.github
+__pycache__
+.mypy_cache
+.pytest_cache
+k8s
+config/config.json
