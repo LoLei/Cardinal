@@ -114,7 +114,8 @@ class SubWatchPlugin(object):
                         channel=self._channel,
                         message=f"New post by {submission.author}: {submission.title} - {submission.url}")
                 return
-            except (prawcore.exceptions.ServerError, prawcore.exceptions.RequestException):
+            except (prawcore.exceptions.ServerError, prawcore.exceptions.RequestException,
+                    prawcore.exceptions.ResponseException):
                 log.exception("Reddit API call failed, restarting...")
                 self._praw_handler = PrawHandler()
                 self._cardinal = self._updated_cardinal
